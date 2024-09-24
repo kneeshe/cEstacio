@@ -23,7 +23,7 @@ int maiorValor(int x){ //cria uma função para verificar a maior nota. em c, n�
 	return maior;
 }
 
-int dadoAluno(Aluno aluno){
+int dadoAluno(struct Aluno aluno){
 	
 	int n;
 		
@@ -69,7 +69,7 @@ int dadoAluno(Aluno aluno){
 
 int main(){
 	
-	Aluno aluno;
+	struct Aluno aluno;
 	
 	dadoAluno(aluno);
 	
