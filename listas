@@ -1,0 +1,302 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+struct No{ //cria a struct
+	int dado; //variavel de valor int
+	struct No *prox; //ponteiro que aponta para a proxima struct; se não apontar para nenhuma, ele aponta para null
+};
+
+struct No * criarNo(int num){ //função para criar a struct
+	struct No *novo = (struct No*) malloc(sizeof(struct No)); //criação do ponteiro e alocação de memoria
+	
+	if(novo == NULL){ //verifica se é possivel alocar memoria. se não for, exibe a mensagem de erro e interrompe o programa
+		printf("Problema ao alocar memoria\n");
+		exit(1); //encerra o processo
+	}
+	
+	novo->dado = num; //passa o valor para a variavel dado
+	novo->prox = NULL; //aponta o ponteiro
+	return novo; //retorna a struct
+}
+
+void inserirInicio(struct No** cabeca, int num){ //insere a nova lista no inicio. dois asteriscos: apontam para o nó do inicio, ou, ponteiro do ponteiro
+	struct No *novo = criarNo(num); //cria a nova struct usando a função pré existente
+	
+	if(*cabeca==NULL){ //verifica se tem algo no inicio. se não tiver, o nó é criado
+		*cabeca = novo; //ponteiro cabeça recebe o valor de novo
+		return;
+	}
+	
+	struct No* aux = *cabeca; //variavel auxiliar para a verificação das listas
+}
+void inserirFim(struct No** cabeca, int num){ //inserei a lista no final
+	struct No *novo = criarNo(num);
+	
+	if(*cabeca == NULL){
+		*cabeca = novo;
+		return;
+	}
+	
+	struct No* aux = *cabeca; //variavel auxiliar
+	
+	while(aux -> prox != NULL){ //verifica as structs para encontrar qual aponta para null
+		aux = aux->prox; //vai jogando o valor dos nó vigente na auxiliar. e.g. ve nó1 
+	}
+	
+	aux -> prox = novo; //ao encontrar o nó com ponteiro apontando para null, cria o nó na frente dela e aponta para null
+}
+
+void inserirPosicao(struct No** cabeca, int num, int posicao){ //insere o nó na posição especificada
+	struct No *novo = criarNo(num);
+	
+	if(posicao == 1){ //posição 1 é o inicio
+		novo->prox = *cabeca; //aponta a nova lista para a cabeça
+		*cabeca = novo; // cabeça aponta o valor da nova lista
+		return;
+	}
+	
+	struct No* aux = *cabeca; //variavel auxiliar
+	
+	for(int i = 1; i < posicao - 1 && aux != NULL; i++){ //contador para localizar a posição. localiza ate a posição anterior da descrita pelo usuario
+		aux = aux->prox; // a auxiliar recebe o valor da proxima lista
+	}
+	
+	if (aux == NULL){ //verifica se a posição é no final. se o ponteiro for null, quer dizer que a posição não é dentro da lista, mas sim no fim
+		printf("Posição invalida\n");
+		return;
+	}
+	novo->prox = aux->prox;  //lista recebe o valor de auxiliar
+	aux->prox = novo; //auxiliar recebe o valor de novo
+}
+
+void imprimirLista(struct No* cabeca){ //imprime a lista na tela
+	struct No* aux = cabeca;
+	
+	while(aux != NULL){ //percorre a lista enquanto auxiliar não apontar para null
+		printf("%d -> ", aux->dado); //imprime os valores de auxiliar apontando para o membro dado na struct
+		aux = aux->prox; //faz com que o auxiliar pegue o valor da proxima lista
+	}
+	
+	printf("NULL\n"); //imprime o termo NULL na tela
+}
+
+void removerInicio(struct No** cabeca){ //remove a lista do inicio
+	if(*cabeca == NULL){ //verifica se a cabeça esta vazia. se estiver, não ha nada no inicio para ser removido
+		printf("Lista Vazia\n");
+		return;
+	}
+	
+	struct No* aux = *cabeca;
+	
+	*cabeca = aux->prox; //aponta o valor para auxiliar
+	free(aux); //libera o valor de auxiliar
+}
+
+void removerFim(struct No** cabeca){ //remove o nó do fim
+	if(*cabeca == NULL){ //se a cabeça for null, então não há final para ser removido
+		printf("Lista vazia\n");
+		return;
+	}
+	
+	struct No* aux = *cabeca;
+	
+	if(aux->prox == NULL){ //se a proxima da auxiliar for null, ela é removida
+		free(aux);
+	}
+	
+	struct No* ant = NULL; //como não podemos remover a lista em que estamos, criamos uma auxliar da auxliar: a lista ant(erior)
+	
+	while (aux->prox != NULL){ //percorre as listas ate o fim
+		ant = aux; //joga o valor da auxiliar para a anterior
+		aux = aux -> prox; //pega o valor da proxima lista para jogar na auxiliar
+	}
+	ant->prox = NULL; //lista anterior recebe o valor null e permite que a auxiliar (ultima) seja apagada
+	free(aux); //elimina a auxilair, mantendo o valor da ant.
+}
+
+void removerPosicao(struct No** cabeca, int posi){ //remove nó da posição 
+	if(*cabeca == NULL){
+		printf("Lista Vazia\n");
+		return;
+	}
+	
+	struct No* aux = *cabeca;
+	
+	if(posi == 1){
+		*cabeca = aux->prox;
+		free(aux);
+		return;
+	}
+	
+	struct No* ant = NULL;
+	
+	for(int i = 1; i < posi && aux != NULL; i++){
+		ant = aux;
+		aux = aux->prox;
+	}
+	
+	if(aux == NULL){
+		printf("Posição invalida\n");
+	}
+	
+	ant->prox = aux->prox;
+	free(aux);
+}
+
+int buscar(struct No* cabeca, int num){
+	int pos = 1;
+	struct No* aux = cabeca;
+	
+	while(aux != NULL){
+		if(aux->dado == num){
+			return pos;
+		}
+		
+		aux = aux->prox;
+		pos++;		
+	}
+	return -1;
+}
+
+int main(){ //função principal
+
+	struct No* cabeca = NULL; //declaração da struct na função principal
+	/*
+	inserirInicio(&cabeca, 10);
+	inserirFim(&cabeca, 20);
+	inserirPosicao(&cabeca, 30, 2);
+	imprimirLista(cabeca);
+	removerInicio(&cabeca);
+	imprimirLista(cabeca);
+	removerFim(&cabeca);
+	
+	int posicao = buscar(cabeca, 15);
+	if(posicao != -1){
+		printf("O elemento esta na posição %d", posicao);
+	}
+	else{
+		printf("Elemento não encontrado");
+	}*/
+	
+	int menu = 1;
+	int num = 0;
+	int pos = 0;
+	
+	printf("--- MENU --- \n");
+	
+	while(menu != 0){
+		
+		printf("Escolha o que deseja: ");
+		printf("1 - Criar no\n");
+		printf("2 - Inserir no inicio\n");
+		printf("3 - Inserir no fim\n");
+		printf("4 - Inserir na posição\n");
+		printf("5 - Imprimir lista\n");
+		printf("6 - Remover do inicio\n");
+		printf("7 - Remover do fim\n");
+		printf("8 - Remover na posição\n");
+		printf("9 - Buscar na lista\n");
+		printf("Opção: ");
+		scanf("%d", &menu);
+			
+		if(menu == 0){
+			printf("Voce escolheu sair");
+			break;
+		}
+		
+		else if(menu == 1){
+			printf("Voce escolheu criar um nó!");
+			printf("Digite o valor a ser inserido no nó: ");
+			scanf("%d", &num);
+			
+			criarNo(num);
+			imprimirLista(cabeca);			
+		}
+		
+		else if(menu == 2){
+			printf("Voce escolheu inserir um nó no inicio!");
+			printf("Digite o valor a ser inserido no nó: ");
+			scanf("%d", &num);			
+			
+			inserirInicio(&cabeca, num);
+			imprimirLista(cabeca);
+		}
+		
+		else if(menu == 3){
+			printf("Voce escolheu inserir um nó no fim!");
+			printf("Digite o valor a ser inserido no nó: ");
+			scanf("%d", &num);
+			
+			inserirFim(&cabeca, num);
+			imprimirLista(cabeca);
+		}
+		
+		else if(menu == 4){
+			printf("Voce escolheu inserir um nó na posicação desejada!");
+			printf("Digite o valor a ser inserido no nó: ");
+			scanf("%d", &num);
+			
+			printf("Digite em qual posição ele irá: ");
+			scanf("%d", &pos);
+			
+			inserirPosicao(&cabeca, num, pos);
+			imprimirLista(cabeca);
+		}
+		
+		else if(menu == 5){
+			printf("Voce escolheu imprimir a lista!");
+			
+			imprimirLista(cabeca);
+		}
+		
+		else if(menu == 6){
+			printf("Voce escolheu remover o nó do inicio!");
+			
+			removerInicio(&cabeca);
+			imprimirLista(cabeca);
+		}
+		
+		else if(menu == 7){
+			printf("Voce escolheu remover um nó do fim!");
+			
+			removerFim(&cabeca);
+			imprimirLista(cabeca);
+		}
+		
+		else if(menu == 8){
+			printf("Voce escolheu remover um nó da posição desejada!");
+			printf("Digite o valor a ser removido da lista: ");
+			scanf("%d", &num);
+			
+			removerPosicao(&cabeca);
+			imprimirLista(cabeca);
+		}
+		
+		else if(menu == 9){
+			printf("Voce escolheu buscar um nó!");
+			printf("Digite o valor a ser buscado no nó: ");
+			scanf("%d", &num);
+			
+			if(posicao != -1){
+				printf("O elemento esta na posição %d", posicao);
+			}
+			else{
+				printf("Elemento não encontrado");
+				}
+			
+			buscar(cabeca, num);
+			imprimirLista(cabeca);
+		}
+		
+		else if(menu > 9){
+			printf("Por favor, insira um numero válido.");
+			break;
+		}
+		
+		else{
+			printf("Entrada invalida");
+		}
+	}
+	
+	return 0;
+}
